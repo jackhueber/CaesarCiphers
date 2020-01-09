@@ -1,0 +1,71 @@
+*> Jack Hueber
+IDENTIFICATION DIVISION.
+PROGRAM-ID. Caesar.
+DATA DIVISION.
+    WORKING-STORAGE SECTION.
+        01 str PIC x(99) VALUE "HAL".
+        01 shift PIC 99 VALUE 1.
+        01 currentStr PIC x(99).
+        01 fullShift PIC 99 VALUE 26.
+        01 iterator PIC 9(3).
+        01 currentChar PIC 9(3).
+        01 caesarCount PIC 9(3) VALUE 1.
+        
+*> Call all of the functions here
+*> MOVE 26 to shift to get it ready for solve
+PROCEDURE DIVISION.
+    begin.
+    DISPLAY "Original Message: " str
+    perform encrypt
+    DISPLAY "Encrypted: " str
+    perform decrypt
+    DISPLAY "Decrypted: " str
+    MOVE 26 TO shift
+    perform encrypt
+    perform solve
+STOP RUN.
+
+*> start of encrypt
+encrypt.
+    MOVE 1 TO iterator
+    PERFORM VARYING iterator FROM 1 BY 1 UNTIL iterator > FUNCTION LENGTH(str)
+        IF str(iterator:1) IS NOT EQUAL TO SPACE
+            MOVE FUNCTION ORD(str(iterator:1)) TO currentChar
+            SUBTRACT 1 FROM currentChar GIVING currentChar
+            SUBTRACT 65 FROM currentChar GIVING currentChar
+            ADD currentChar TO shift GIVING currentChar
+            MOVE FUNCTION MOD (currentChar, 26) TO currentChar
+            ADD 66 TO currentChar GIVING currentChar
+            MOVE FUNCTION CHAR(currentChar) TO str(iterator:1)
+        END-IF
+    END-PERFORM.
+    
+*> start of decrypt
+decrypt.
+    MOVE 1 TO iterator
+    PERFORM VARYING iterator FROM 1 BY 1 UNTIL iterator > FUNCTION LENGTH(str)
+        IF str(iterator:1) IS NOT EQUAL TO SPACE
+            MOVE FUNCTION ORD(str(iterator:1)) TO currentChar
+            SUBTRACT 1 FROM currentChar GIVING currentChar
+            SUBTRACT 65 FROM currentChar GIVING currentChar
+            SUBTRACT shift FROM currentChar GIVING currentChar
+            ADD 26 TO currentChar GIVING currentChar
+            MOVE FUNCTION MOD (currentChar, 26) TO currentChar
+            ADD 66 TO currentChar GIVING currentChar
+            MOVE FUNCTION CHAR(currentChar) TO str(iterator:1)
+        END-IF
+    END-PERFORM.
+
+*> start of solve, same as always and run encrypt to the fullShift amount
+solve.
+    MOVE fullShift TO caesarCount
+    MOVE str TO currentStr
+    PERFORM UNTIL caesarCount=0
+        MOVE caesarCount TO shift
+        MOVE currentStr TO str
+        perform encrypt
+        DISPLAY "Caeser " caesarCount ": " str
+        SUBTRACT 1 FROM caesarCount GIVING caesarCount
+    END-PERFORM.
+
+
